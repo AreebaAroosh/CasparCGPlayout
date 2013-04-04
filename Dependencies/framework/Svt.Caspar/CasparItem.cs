@@ -95,9 +95,6 @@ namespace Svt.Caspar
         }
 
 		private Transition transition_ = new Transition();
-        private int VideoLayer_2;
-        private string p;
-        private int p_2;
 		public Transition Transition
 		{
 			get { return transition_; }

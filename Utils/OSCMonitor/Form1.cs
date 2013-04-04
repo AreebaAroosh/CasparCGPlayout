@@ -22,7 +22,7 @@ namespace OSCMonitor
         public Form1()
         {
             InitializeComponent();
-            osc_server = new OscServer(TransportType.Tcp, IPAddress.Parse("127.0.0.1"), 5253);
+            osc_server = new OscServer(Bespoke.Common.Net.TransportType.Tcp, IPAddress.Parse("127.0.0.1"), 5253);
             osc_server.MessageReceived += new OscMessageReceivedHandler(osc_server_MessageReceived);
             
             //Need to build in Connected/Disconnected/FailedConnect Event Handlers

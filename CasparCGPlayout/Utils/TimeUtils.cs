@@ -26,7 +26,10 @@ namespace CasparCGPlayout.Utils
 
             long iSec = iWorkingFrames / fps;
 
-            return ((iHr < 10 ? "0" : "") + iHr + ":" + (iMn < 10 ? "0" : "") + iMn + ":" + (iSec < 10 ? "0" : "") + iSec);
+            iWorkingFrames = iWorkingFrames - (iSec * fps);
+            long iFr = iWorkingFrames;
+
+            return ((iHr < 10 ? "0" : "") + iHr + ":" + (iMn < 10 ? "0" : "") + iMn + ":" + (iSec < 10 ? "0" : "") + iSec +":"+ (iFr < 10 ? "0" : "") + iFr);
             
 
         }

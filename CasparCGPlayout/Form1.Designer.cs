@@ -40,13 +40,12 @@
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.tsLabel_STOPALL = new System.Windows.Forms.ToolStripLabel();
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
-            this.btnDogToggle = new System.Windows.Forms.Button();
             this.panel2 = new System.Windows.Forms.Panel();
-            this.progressBar2 = new System.Windows.Forms.ProgressBar();
+            this.pgbCountup = new System.Windows.Forms.ProgressBar();
             this.lblPastDesc = new System.Windows.Forms.Label();
             this.lblCountUp = new System.Windows.Forms.Label();
             this.panel3 = new System.Windows.Forms.Panel();
-            this.pgbcountdown = new System.Windows.Forms.ProgressBar();
+            this.pgbCountdown = new System.Windows.Forms.ProgressBar();
             this.lblRemainDesc = new System.Windows.Forms.Label();
             this.lblCountDown = new System.Windows.Forms.Label();
             this.panel4 = new System.Windows.Forms.Panel();
@@ -57,8 +56,9 @@
             this.btnGoNext = new System.Windows.Forms.Button();
             this.tmrConnectionCheck = new System.Windows.Forms.Timer(this.components);
             this.tmrClockStarts = new System.Windows.Forms.Timer(this.components);
-            this.listBox1 = new System.Windows.Forms.ListBox();
             this.btnHold = new System.Windows.Forms.Button();
+            this.cmsHold = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.tsmiLatchHold = new System.Windows.Forms.ToolStripMenuItem();
             this.tmrCGTiming = new System.Windows.Forms.Timer(this.components);
             this.tmrNTPUpdate = new System.Windows.Forms.Timer(this.components);
             this.panel1 = new System.Windows.Forms.Panel();
@@ -67,13 +67,19 @@
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.panel5 = new System.Windows.Forms.Panel();
             this.label1 = new System.Windows.Forms.Label();
+            this.vuMeter2 = new VU_MeterLibrary.VuMeter();
+            this.vuMeter1 = new VU_MeterLibrary.VuMeter();
+            this.digitalStudioClock1 = new CasparCGPlayout.DigitalStudioClock.DigitalStudioClock();
+            this.holdlatchingguitimer = new System.Windows.Forms.Timer(this.components);
             this.ListRunningOrder = new CasparCGPlayout.Components.exListBox();
-            this.digitalStudioClock1 = new AndyMace.Controls.DigitalStudioClock();
+            this.button1 = new System.Windows.Forms.Button();
+            this.tmrCheckAssetOnDisk = new System.Windows.Forms.Timer(this.components);
             this.statusStrip1.SuspendLayout();
             this.toolStrip1.SuspendLayout();
             this.panel2.SuspendLayout();
             this.panel3.SuspendLayout();
             this.panel4.SuspendLayout();
+            this.cmsHold.SuspendLayout();
             this.panel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox3)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).BeginInit();
@@ -154,27 +160,19 @@
             this.toolStripSeparator2.Name = "toolStripSeparator2";
             resources.ApplyResources(this.toolStripSeparator2, "toolStripSeparator2");
             // 
-            // btnDogToggle
-            // 
-            this.btnDogToggle.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
-            resources.ApplyResources(this.btnDogToggle, "btnDogToggle");
-            this.btnDogToggle.Name = "btnDogToggle";
-            this.btnDogToggle.UseVisualStyleBackColor = false;
-            this.btnDogToggle.Click += new System.EventHandler(this.btnDogToggleClick);
-            // 
             // panel2
             // 
             this.panel2.BackColor = System.Drawing.SystemColors.ControlDark;
-            this.panel2.Controls.Add(this.progressBar2);
+            this.panel2.Controls.Add(this.pgbCountup);
             this.panel2.Controls.Add(this.lblPastDesc);
             this.panel2.Controls.Add(this.lblCountUp);
             resources.ApplyResources(this.panel2, "panel2");
             this.panel2.Name = "panel2";
             // 
-            // progressBar2
+            // pgbCountup
             // 
-            resources.ApplyResources(this.progressBar2, "progressBar2");
-            this.progressBar2.Name = "progressBar2";
+            resources.ApplyResources(this.pgbCountup, "pgbCountup");
+            this.pgbCountup.Name = "pgbCountup";
             // 
             // lblPastDesc
             // 
@@ -189,16 +187,16 @@
             // panel3
             // 
             this.panel3.BackColor = System.Drawing.SystemColors.ControlDark;
-            this.panel3.Controls.Add(this.pgbcountdown);
+            this.panel3.Controls.Add(this.pgbCountdown);
             this.panel3.Controls.Add(this.lblRemainDesc);
             this.panel3.Controls.Add(this.lblCountDown);
             resources.ApplyResources(this.panel3, "panel3");
             this.panel3.Name = "panel3";
             // 
-            // pgbcountdown
+            // pgbCountdown
             // 
-            resources.ApplyResources(this.pgbcountdown, "pgbcountdown");
-            this.pgbcountdown.Name = "pgbcountdown";
+            resources.ApplyResources(this.pgbCountdown, "pgbCountdown");
+            this.pgbCountdown.Name = "pgbCountdown";
             // 
             // lblRemainDesc
             // 
@@ -251,20 +249,27 @@
             // 
             this.tmrConnectionCheck.Tick += new System.EventHandler(this.tmrConnectionCheckTick);
             // 
-            // listBox1
-            // 
-            this.listBox1.FormattingEnabled = true;
-            resources.ApplyResources(this.listBox1, "listBox1");
-            this.listBox1.Name = "listBox1";
-            this.listBox1.DoubleClick += new System.EventHandler(this.ListBox1DoubleClick);
-            // 
             // btnHold
             // 
             this.btnHold.BackColor = System.Drawing.Color.Silver;
+            this.btnHold.ContextMenuStrip = this.cmsHold;
             resources.ApplyResources(this.btnHold, "btnHold");
             this.btnHold.Name = "btnHold";
             this.btnHold.UseVisualStyleBackColor = false;
             this.btnHold.Click += new System.EventHandler(this.BtnHoldClick);
+            // 
+            // cmsHold
+            // 
+            this.cmsHold.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.tsmiLatchHold});
+            this.cmsHold.Name = "cmsHold";
+            resources.ApplyResources(this.cmsHold, "cmsHold");
+            this.cmsHold.Opening += new System.ComponentModel.CancelEventHandler(this.cmsHold_Opening);
+            // 
+            // tsmiLatchHold
+            // 
+            this.tsmiLatchHold.Name = "tsmiLatchHold";
+            resources.ApplyResources(this.tsmiLatchHold, "tsmiLatchHold");
             // 
             // tmrCGTiming
             // 
@@ -318,11 +323,89 @@
             resources.ApplyResources(this.label1, "label1");
             this.label1.Name = "label1";
             // 
-            // ListRunningOrder
+            // vuMeter2
             // 
-            this.ListRunningOrder.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawVariable;
-            resources.ApplyResources(this.ListRunningOrder, "ListRunningOrder");
-            this.ListRunningOrder.Name = "ListRunningOrder";
+            this.vuMeter2.AnalogMeter = false;
+            this.vuMeter2.BackColor = System.Drawing.Color.White;
+            this.vuMeter2.DialBackground = System.Drawing.Color.White;
+            this.vuMeter2.DialTextNegative = System.Drawing.Color.Red;
+            this.vuMeter2.DialTextPositive = System.Drawing.Color.Black;
+            this.vuMeter2.DialTextZero = System.Drawing.Color.DarkGreen;
+            this.vuMeter2.Led1ColorOff = System.Drawing.Color.DarkGreen;
+            this.vuMeter2.Led1ColorOn = System.Drawing.Color.LimeGreen;
+            this.vuMeter2.Led1Count = 18;
+            this.vuMeter2.Led2ColorOff = System.Drawing.Color.Olive;
+            this.vuMeter2.Led2ColorOn = System.Drawing.Color.Yellow;
+            this.vuMeter2.Led2Count = 16;
+            this.vuMeter2.Led3ColorOff = System.Drawing.Color.Maroon;
+            this.vuMeter2.Led3ColorOn = System.Drawing.Color.Red;
+            this.vuMeter2.Led3Count = 8;
+            this.vuMeter2.LedSize = new System.Drawing.Size(16, 6);
+            this.vuMeter2.LedSpace = 1;
+            this.vuMeter2.Level = 0;
+            this.vuMeter2.LevelMax = 65535;
+            resources.ApplyResources(this.vuMeter2, "vuMeter2");
+            this.vuMeter2.MeterScale = VU_MeterLibrary.MeterScale.Log10;
+            this.vuMeter2.Name = "vuMeter2";
+            this.vuMeter2.NeedleColor = System.Drawing.Color.Black;
+            this.vuMeter2.PeakHold = true;
+            this.vuMeter2.Peakms = 1000;
+            this.vuMeter2.PeakNeedleColor = System.Drawing.Color.Red;
+            this.vuMeter2.ShowDialOnly = false;
+            this.vuMeter2.ShowLedPeak = true;
+            this.vuMeter2.ShowTextInDial = false;
+            this.vuMeter2.TextInDial = new string[] {
+        "-40",
+        "-20",
+        "-10",
+        "-5",
+        "0",
+        "+6"};
+            this.vuMeter2.UseLedLight = false;
+            this.vuMeter2.VerticalBar = true;
+            this.vuMeter2.VuText = "VU";
+            // 
+            // vuMeter1
+            // 
+            this.vuMeter1.AnalogMeter = false;
+            this.vuMeter1.BackColor = System.Drawing.Color.White;
+            this.vuMeter1.DialBackground = System.Drawing.Color.White;
+            this.vuMeter1.DialTextNegative = System.Drawing.Color.Red;
+            this.vuMeter1.DialTextPositive = System.Drawing.Color.Black;
+            this.vuMeter1.DialTextZero = System.Drawing.Color.DarkGreen;
+            this.vuMeter1.Led1ColorOff = System.Drawing.Color.DarkGreen;
+            this.vuMeter1.Led1ColorOn = System.Drawing.Color.LimeGreen;
+            this.vuMeter1.Led1Count = 18;
+            this.vuMeter1.Led2ColorOff = System.Drawing.Color.Olive;
+            this.vuMeter1.Led2ColorOn = System.Drawing.Color.Yellow;
+            this.vuMeter1.Led2Count = 16;
+            this.vuMeter1.Led3ColorOff = System.Drawing.Color.Maroon;
+            this.vuMeter1.Led3ColorOn = System.Drawing.Color.Red;
+            this.vuMeter1.Led3Count = 8;
+            this.vuMeter1.LedSize = new System.Drawing.Size(16, 6);
+            this.vuMeter1.LedSpace = 1;
+            this.vuMeter1.Level = 0;
+            this.vuMeter1.LevelMax = 65535;
+            resources.ApplyResources(this.vuMeter1, "vuMeter1");
+            this.vuMeter1.MeterScale = VU_MeterLibrary.MeterScale.Log10;
+            this.vuMeter1.Name = "vuMeter1";
+            this.vuMeter1.NeedleColor = System.Drawing.Color.Black;
+            this.vuMeter1.PeakHold = true;
+            this.vuMeter1.Peakms = 1000;
+            this.vuMeter1.PeakNeedleColor = System.Drawing.Color.Red;
+            this.vuMeter1.ShowDialOnly = false;
+            this.vuMeter1.ShowLedPeak = true;
+            this.vuMeter1.ShowTextInDial = false;
+            this.vuMeter1.TextInDial = new string[] {
+        "-40",
+        "-20",
+        "-10",
+        "-5",
+        "0",
+        "+6"};
+            this.vuMeter1.UseLedLight = false;
+            this.vuMeter1.VerticalBar = true;
+            this.vuMeter1.VuText = "VU";
             // 
             // digitalStudioClock1
             // 
@@ -331,21 +414,44 @@
             resources.ApplyResources(this.digitalStudioClock1, "digitalStudioClock1");
             this.digitalStudioClock1.Name = "digitalStudioClock1";
             // 
+            // holdlatchingguitimer
+            // 
+            this.holdlatchingguitimer.Interval = 750;
+            this.holdlatchingguitimer.Tick += new System.EventHandler(this.holdlatchingguitimer_Tick);
+            // 
+            // ListRunningOrder
+            // 
+            this.ListRunningOrder.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawVariable;
+            resources.ApplyResources(this.ListRunningOrder, "ListRunningOrder");
+            this.ListRunningOrder.Name = "ListRunningOrder";
+            // 
+            // button1
+            // 
+            resources.ApplyResources(this.button1, "button1");
+            this.button1.Name = "button1";
+            this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.button1_Click);
+            // 
+            // tmrCheckAssetOnDisk
+            // 
+            this.tmrCheckAssetOnDisk.Tick += new System.EventHandler(this.tmrCheckAssetOnDisk_Tick);
+            // 
             // Form1
             // 
             resources.ApplyResources(this, "$this");
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.Controls.Add(this.button1);
             this.Controls.Add(this.digitalStudioClock1);
+            this.Controls.Add(this.vuMeter1);
+            this.Controls.Add(this.vuMeter2);
             this.Controls.Add(this.panel5);
             this.Controls.Add(this.ListRunningOrder);
             this.Controls.Add(this.panel1);
             this.Controls.Add(this.btnHold);
             this.Controls.Add(this.panel4);
-            this.Controls.Add(this.listBox1);
             this.Controls.Add(this.btnGoNext);
             this.Controls.Add(this.panel3);
             this.Controls.Add(this.panel2);
-            this.Controls.Add(this.btnDogToggle);
             this.Controls.Add(this.toolStrip1);
             this.Controls.Add(this.statusStrip1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
@@ -363,6 +469,7 @@
             this.panel2.ResumeLayout(false);
             this.panel3.ResumeLayout(false);
             this.panel4.ResumeLayout(false);
+            this.cmsHold.ResumeLayout(false);
             this.panel1.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox3)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).EndInit();
@@ -378,7 +485,6 @@
         private System.Windows.Forms.StatusStrip statusStrip1;
         private System.Windows.Forms.ToolStrip toolStrip1;
         private System.Windows.Forms.ToolStripLabel toolStrip1FileLabel;
-        private System.Windows.Forms.Button btnDogToggle;
         private System.Windows.Forms.Panel panel2;
         private System.Windows.Forms.Label lblPastDesc;
         private System.Windows.Forms.Label lblCountUp;
@@ -397,15 +503,14 @@
         private System.Windows.Forms.ToolStripStatusLabel toolstriplabelAMCPConnected;
         private System.Windows.Forms.ToolStripStatusLabel toolstriplabelOSCConnected;
         private System.Windows.Forms.ToolStripStatusLabel toolstriplabelDBConnected;
-        private System.Windows.Forms.ListBox listBox1;
         private System.Windows.Forms.Button btnHold;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
         private System.Windows.Forms.ToolStripLabel tsLabel_STOPALL;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
         private System.Windows.Forms.Timer tmrCGTiming;
         private System.Windows.Forms.Timer tmrNTPUpdate;
-        private System.Windows.Forms.ProgressBar pgbcountdown;
-        private System.Windows.Forms.ProgressBar progressBar2;
+        private System.Windows.Forms.ProgressBar pgbCountdown;
+        private System.Windows.Forms.ProgressBar pgbCountup;
         private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.PictureBox pictureBox1;
         private System.Windows.Forms.PictureBox pictureBox2;
@@ -413,7 +518,14 @@
         private Components.exListBox ListRunningOrder;
         private System.Windows.Forms.Panel panel5;
         private System.Windows.Forms.Label label1;
-        private AndyMace.Controls.DigitalStudioClock digitalStudioClock1;
+        private VU_MeterLibrary.VuMeter vuMeter2;
+        private VU_MeterLibrary.VuMeter vuMeter1;
+        private DigitalStudioClock.DigitalStudioClock digitalStudioClock1;
+        private System.Windows.Forms.Timer holdlatchingguitimer;
+        private System.Windows.Forms.ContextMenuStrip cmsHold;
+        private System.Windows.Forms.ToolStripMenuItem tsmiLatchHold;
+        private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.Timer tmrCheckAssetOnDisk;
         
     }
 }

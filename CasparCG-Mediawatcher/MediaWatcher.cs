@@ -9,6 +9,15 @@
     using log4net;
     using log4net.Config;
     using MySql.Data.MySqlClient;
+    using FFmpegSharp.Interop;
+    using FFmpegSharp;
+    using System.Drawing;
+    using System.Runtime.InteropServices;
+    using System.Drawing.Imaging;
+    using CasparCG_Mediawatcher;
+    using System.Xml.XPath;
+    using System.Xml;
+   
 
     class MediaWatcher : ServiceBase
     {
@@ -41,8 +50,6 @@
         private void InitializeComponent()
         {
             this.ServiceName = "CasparCG-MediaWatcher";
-            
-
         }
 
         /// <summary>
@@ -50,7 +57,7 @@
         /// </summary>
         protected override void OnStart(string[] args)
         {
-            DOMConfigurator.Configure();
+            XmlConfigurator.Configure();
            
             try
             {
@@ -66,8 +73,9 @@
             {
                 Logger.Info(e.Message);
             }
-
+            Logger.Info("=========================");
             Logger.Info("Starting Application...");
+            Logger.Info("=========================");
             Logger.Info("Connecting to Database");
             connectDatabase();
 
@@ -102,10 +110,15 @@
             {
                 abortActivityMonitoring();
             }
+
+            
+            
+
         }
         protected override void OnStop()
         {
             abortActivityMonitoring();
+            _connection.Close();
         }
 
         private void abortActivityMonitoring()
@@ -143,13 +156,66 @@
 
         private void DeletedMedia(FileSystemEventArgs e)
         {
-            throw new NotImplementedException();
         }
 
         private void ChangedMedia(FileSystemEventArgs e)
         {
-            throw new NotImplementedException();
+
+            //Ok, heres the plan.
+            //Monitor a directory for a file change...
+            //If its an xml extension, read it and get the media injest details for the "media" table and name in data
+            //Convert file to "House Standard" and move the import to successful folder or invalid if not completed.
+            //Take a snapshot of the converted file into memory
+            //Insert SQL if doesn't exist already / or Update with new snapshot & media details.
+
+            XPathNavigator nav;
+            XPathDocument docNav;
+            XPathNodeIterator NodeIter;
+            XPathExpression expr;
+
+            if (Path.GetExtension(e.FullPath) == ".xml")
+            {
+                // Open the XML.
+                docNav = new XPathDocument(e.FullPath);
+                // Create a navigator to query with XPath.
+                nav = docNav.CreateNavigator();
+               expr = nav.Compile("/asset/infilename");
+              XPathNodeIterator iterator = nav.Select(expr);
+
+              try
+                {
+                while (iterator.MoveNext())
+                  {
+                    
+                  }
+                }
+                catch(Exception ex) 
+                {
+                  Console.WriteLine(ex.Message);
+                }
+                
+                MediaFile file = new MediaFile(e.FullPath);
+                Logger.Info("Opened Media Stream: " + e.FullPath);
+                Random random = new Random();
+                VideoHandler vh = new VideoHandler();
+
+                foreach (DecoderStream stream in file.Streams)
+                {
+                    VideoDecoderStream videoStream = stream as VideoDecoderStream;
+                    if (videoStream != null)
+                    {
+                        vh.Stream = new VideoScalingStream(videoStream, 720, 576, FFmpegSharp.Interop.Util.PixelFormat.PIX_FMT_RGB32);
+                    }
+                }
+            }
+
+
+            
+
+    
         }
+
+
 
         private void AddNewMedia(FileSystemEventArgs e)
         {
@@ -179,7 +245,7 @@
             }
             catch (MySqlException e)
             {
-                Logger.Fatal("MySQL - Couldn't connect (ConnectDatabase())");
+                Logger.Fatal("MySQL - Couldn't connect (ConnectDatabase()): " + e.Data);
             }
         }
 
@@ -193,7 +259,7 @@
 
             if (e.CurrentState == ConnectionState.Closed)
             {
-                connectDatabase();
+                 Logger.Info("Database disconnect");
             }
         }
 

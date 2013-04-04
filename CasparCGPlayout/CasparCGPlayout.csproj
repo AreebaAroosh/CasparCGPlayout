@@ -76,7 +76,7 @@
     <CodeAnalysisFailOnMissingRules>false</CodeAnalysisFailOnMissingRules>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
-    <PlatformTarget>AnyCPU</PlatformTarget>
+    <PlatformTarget>x86</PlatformTarget>
     <OutputPath>bin\Debug\</OutputPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
@@ -84,9 +84,6 @@
     <OutputPath>bin\Release\</OutputPath>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="AndyMace.Controls.DigitalStudioClock">
-      <HintPath>..\..\studiomonitor\StudioMonitor\AndyMace.Controls.DigitalStudioClock.dll</HintPath>
-    </Reference>
     <Reference Include="log4net">
       <HintPath>..\Dependencies\log4net\log4net.dll</HintPath>
     </Reference>
@@ -98,10 +95,12 @@
     <Reference Include="System.configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Design" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Web.Extensions" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
+    <Reference Include="VU_MeterLibrary, Version=1.0.0.0, Culture=neutral, processorArchitecture=x86" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AboutBox.cs">
@@ -116,13 +115,15 @@
     <Compile Include="components\exListBox.Designer.cs">
       <DependentUpon>exListBox.cs</DependentUpon>
     </Compile>
-    <Compile Include="ItemClasses\ListBoxHOurMarker.cs" />
+    <Compile Include="ItemClasses\ListBoxHourMarker.cs" />
     <Compile Include="ItemClasses\ListBoxSDIItem.cs" />
     <Compile Include="ItemClasses\ListBoxCGItem.cs" />
     <Compile Include="ItemClasses\ListBoxItem.cs" />
     <None Include="ItemClasses\ListBoxItem.cs.old" />
     <Compile Include="ItemClasses\ListboxTimeLineItem.cs" />
     <Compile Include="ItemClasses\ListBoxVideoItem.cs" />
+    <Compile Include="Utils\SegueEnum.cs" />
+    <Compile Include="Utils\CGCatergoryEnum.cs" />
     <Compile Include="Utils\NTPClient.cs" />
     <Compile Include="Utils\WhatNextEnum.cs" />
     <Compile Include="Utils\CurrentPlayingItem.cs" />
@@ -173,6 +174,9 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="caspar.ico" />
+    <EmbeddedResource Include="images\quickopen.png" />
+    <EmbeddedResource Include="images\view-remove.png" />
+    <EmbeddedResource Include="images\transform-distort.png" />
     <EmbeddedResource Include="images\commercial.png" />
     <EmbeddedResource Include="images\ident.png" />
     <EmbeddedResource Include="images\programme.png" />
@@ -232,6 +236,10 @@
     <ProjectReference Include="..\Dependencies\OSCFramework\Bespoke.Common\src\Bespoke.Common.csproj">
       <Project>{D7695C90-F793-4E8C-B8BA-B6B5E0815093}</Project>
       <Name>Bespoke.Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DigitalStudioClock\DigitalStudioClock.csproj">
+      <Project>{53028A9B-CB45-494F-8CC6-214CDE70BCA1}</Project>
+      <Name>DigitalStudioClock</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup />

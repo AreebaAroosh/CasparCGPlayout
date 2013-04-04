@@ -10,16 +10,18 @@ namespace CasparCGPlayout.Components
         private StringFormat _fmt;
         private Font _titleFont;
         private Font _detailsFont;
-        private StringFormat alignment;
         private Font clipIDFont;
         private Font timeStartFont;
         private Font displayFont;
         private Font lengthOfClipFont;
         private Size imageSize;
+        private StringFormat alignment;
+        
 
         public exListBox(Font titleFont, Font detailsFont, Size imageSize,
                          StringAlignment aligment, StringAlignment lineAligment)
         {
+            this.SetStyle(ControlStyles.UserPaint | ControlStyles.AllPaintingInWmPaint | ControlStyles.OptimizedDoubleBuffer, true);
             _titleFont = titleFont;
             _detailsFont = detailsFont;
             _imageSize = imageSize;
@@ -34,6 +36,8 @@ namespace CasparCGPlayout.Components
         public exListBox()
         {
             InitializeComponent();
+
+            DoubleBuffered = true;
 
             this.ItemHeight = _imageSize.Height + this.Margin.Vertical;
             _fmt = new StringFormat();
@@ -84,8 +88,15 @@ namespace CasparCGPlayout.Components
             // prevent from error Visual Designer
             if (this.Items.Count > 0)
             {
-                ListBoxVideoItem item = (ListBoxVideoItem)this.Items[e.Index];
-                item.drawItem(e, this.Margin, timeStartFont, clipIDFont, displayFont, lengthOfClipFont, alignment, imageSize);
+                if ( this.Items[e.Index] is ListBoxVideoItem)
+                {
+                        ListBoxVideoItem item = (ListBoxVideoItem)this.Items[e.Index];
+                        item.drawItem(e, this.Margin, timeStartFont, clipIDFont, displayFont, lengthOfClipFont, alignment, imageSize);
+                } else if ( this.Items[e.Index] is ListBoxCGItem)
+                {
+                        ListBoxCGItem item = (ListBoxCGItem)this.Items[e.Index];
+                        item.drawItem(e, this.Margin, timeStartFont, clipIDFont, displayFont, lengthOfClipFont, alignment, imageSize);
+                }
             }
         }
 

@@ -7,10 +7,10 @@ using System.Globalization;
 using System.Text;
 using System.Windows.Forms;
 
-namespace CasparCGPlayout.Components
+namespace CasparCGPlayout.DigitalStudioClock
 {
 
-    public partial class DigitalStudioClock : UserControl
+    public class DigitalStudioClock : UserControl
     {
         Color ticksColor = Color.Black;
         //float fTicksThickness = 1;
@@ -38,6 +38,9 @@ namespace CasparCGPlayout.Components
             set { _digitText = value; Invalidate(); }
         }
 
+        private System.ComponentModel.IContainer components;
+        private System.Windows.Forms.Timer timer1 = new Timer();
+
         public DigitalStudioClock()
         {
             this.SetStyle(ControlStyles.DoubleBuffer, true);
@@ -49,6 +52,47 @@ namespace CasparCGPlayout.Components
             this.BackColor = Color.Transparent;
         }
 
+        /// <summary>
+        /// Clean up any resources being used.
+        /// </summary>
+        /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing && (components != null))
+            {
+                components.Dispose();
+            }
+            base.Dispose(disposing);
+        }
+
+        #region Component Designer generated code
+
+        /// <summary>
+        /// Required method for Designer support - do not modify 
+        /// the contents of this method with the code editor.
+        /// </summary>
+        private void InitializeComponent()
+        {
+            this.components = new System.ComponentModel.Container();
+            this.SuspendLayout();
+            // 
+            // DigitalStudioClock
+            // 
+            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.DoubleBuffered = true;
+            this.Name = "DigitalStudioClock";
+            this.Size = new System.Drawing.Size(649, 507);
+            this.ResumeLayout(false);
+            this.Paint += new PaintEventHandler(this.DigitalGauge_Paint);
+
+            this.timer1.Enabled = true;
+            this.timer1.Interval = 1000;
+            this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
+
+        }
+
+        #endregion
         private void DigitalGauge_Paint(object sender, PaintEventArgs e)
         {
             e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
@@ -225,9 +269,6 @@ namespace CasparCGPlayout.Components
             _segmentData.SetValue(_segmentData7, 7);
             _segmentData.SetValue(_segmentData8, 8);
             _segmentData.SetValue(_segmentData9, 9);
-
-
-
         }
 
 

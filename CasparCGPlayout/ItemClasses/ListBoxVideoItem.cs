@@ -3,6 +3,7 @@ using CasparCGPlayout.Utils;
 using System.Drawing;
 using System.Windows.Forms;
 using System.Collections.Generic;
+using Svt.Caspar;
 
 namespace CasparCGPlayout.ItemClasses
 {
@@ -10,6 +11,7 @@ namespace CasparCGPlayout.ItemClasses
     {
         Image _whatnextimage;
         Image _categoryimage;
+        Image _segueimage;
         WhatNextEnum _whatnext;
         Rectangle _clipIdBounds;
         Rectangle _display1Bounds;
@@ -25,9 +27,13 @@ namespace CasparCGPlayout.ItemClasses
         public int inFrames { get; set; }
         public int outFrames { get; set; }
         public Image itemImage { get; set; }
-        public CatergoryEnum Catergory { get; set; }
+        public VideoCatergoryEnum Catergory { get; set; }
+        public TransitionType Segue { get; set; }
+        public Int32 SegLength { get; set; }
+        public bool existOnDisk { get; set; }
+        public string ClipFilename { get; set; }
            
-        public ListBoxVideoItem(int id, string timestart, string clipid, string display1, string display2, TimeSpan lengthofclip, TypeEnum type, WhatNextEnum whatnext, int inframes, int outframes, Image itemImage, CatergoryEnum category) : base (id, timestart)
+        public ListBoxVideoItem(int id, string timestart, string clipid, string display1, string display2, TimeSpan lengthofclip, TypeEnum type, WhatNextEnum whatnext, int inframes, int outframes, Image itemImage, VideoCatergoryEnum category, TransitionType segue, Int32 seglength, string clipfilename) : base (id, timestart)
         {
             this.clipID = clipid;
             this.display1 = display1;
@@ -39,11 +45,15 @@ namespace CasparCGPlayout.ItemClasses
             this.outFrames = outframes;
             this.itemImage = itemImage;
             this.Catergory = category;
+            this.Segue = segue;
+            this.SegLength = seglength;
             
+            this.ClipFilename = clipfilename; 
         }
 
         public void drawItem(DrawItemEventArgs e, Padding margin, Font timeStartFont, Font clipIDFont, Font displayFont, Font lengthOfClipFont, StringFormat aligment, Size imageSize)
         {
+            
             //logger.Info(String.Format("{0}, {1}, {2}, {3}", e.Bounds.X, e.Bounds.Y, e.Bounds.Width, e.Bounds.Height));
             //e.Graphics.Clip = new Region(new Rectangle(32, 32, 32, 32));
 
@@ -57,7 +67,18 @@ namespace CasparCGPlayout.ItemClasses
                 switch (type)
                 {
                     case TypeEnum.Video:
-                        e.Graphics.FillRectangle(Brushes.LightPink, e.Bounds);
+                        switch (Catergory)
+                        {
+                            case VideoCatergoryEnum.Programme:
+                                e.Graphics.FillRectangle(Brushes.AliceBlue, e.Bounds);
+                                break;
+                            case VideoCatergoryEnum.Commercial:
+                                e.Graphics.FillRectangle(Brushes.LightSeaGreen, e.Bounds);
+                                break;
+                            default:
+                                e.Graphics.FillRectangle(Brushes.LightPink, e.Bounds);
+                                break;
+                        }
                         break;
                     case TypeEnum.CG:
                         e.Graphics.FillRectangle(Brushes.PaleVioletRed, e.Bounds);
@@ -66,12 +87,7 @@ namespace CasparCGPlayout.ItemClasses
 
             }
 
-            if (isPlaying)
-            {
-                e.Graphics.FillRectangle(Brushes.DarkOrange, e.Bounds);
-                _whatnextimage = Image.FromStream(System.Reflection.Assembly.GetEntryAssembly().GetManifestResourceStream("CasparCGPlayout.images.play.png"));
-            }
-
+           
             switch (_whatnext)
             {
                 case WhatNextEnum.Playnext:
@@ -82,18 +98,39 @@ namespace CasparCGPlayout.ItemClasses
                     break;
             }
 
+            if (isPlaying)
+            {
+                e.Graphics.FillRectangle(Brushes.YellowGreen, e.Bounds);
+                _whatnextimage = Image.FromStream(System.Reflection.Assembly.GetEntryAssembly().GetManifestResourceStream("CasparCGPlayout.images.play.png"));
+            }
+
+
             switch (Catergory)
              {
-                 case CatergoryEnum.Commercial:
+                 case VideoCatergoryEnum.Commercial:
                      _categoryimage = Image.FromStream(System.Reflection.Assembly.GetEntryAssembly().GetManifestResourceStream("CasparCGPlayout.images.commercial.png"));
                      break;
-                 case CatergoryEnum.Ident:
+                 case VideoCatergoryEnum.Ident:
                      _categoryimage = Image.FromStream(System.Reflection.Assembly.GetEntryAssembly().GetManifestResourceStream("CasparCGPlayout.images.ident.png"));
                      break;
-                 case CatergoryEnum.Programme:
+                 case VideoCatergoryEnum.Programme:
                      _categoryimage = Image.FromStream(System.Reflection.Assembly.GetEntryAssembly().GetManifestResourceStream("CasparCGPlayout.images.programme.png"));
                      break;
              }
+
+            switch (Segue)
+            {
+                case TransitionType.CUT:
+                    _segueimage = Image.FromStream(System.Reflection.Assembly.GetEntryAssembly().GetManifestResourceStream("CasparCGPlayout.images.quickopen.png"));
+                    break;
+                case TransitionType.MIX:
+                    _segueimage = Image.FromStream(System.Reflection.Assembly.GetEntryAssembly().GetManifestResourceStream("CasparCGPlayout.images.view-remove.png"));
+                    break;
+                case TransitionType.WIPE:
+                    _segueimage = Image.FromStream(System.Reflection.Assembly.GetEntryAssembly().GetManifestResourceStream("CasparCGPlayout.images.transform-distort.png"));
+                    break;
+            }
+
 
             // draw some item separator
             e.Graphics.DrawLine(Pens.DarkGray, e.Bounds.X, e.Bounds.Y, e.Bounds.X + e.Bounds.Width, e.Bounds.Y);
@@ -101,8 +138,11 @@ namespace CasparCGPlayout.ItemClasses
             // draw item image
             e.Graphics.DrawImage(this.itemImage, e.Bounds.X + margin.Left, e.Bounds.Y + margin.Top, imageSize.Width, imageSize.Height);
 
+            // draw segue image
+            e.Graphics.DrawImage(this._segueimage, e.Bounds.Width - imageSize.Width - margin.Right - imageSize.Width, e.Bounds.Y + margin.Top, imageSize.Width, imageSize.Height);
+
             //Draw Catergory Image
-            e.Graphics.DrawImage(this._categoryimage, e.Bounds.Width - imageSize.Width - margin.Right - _whatnextimage.Width - 30, e.Bounds.Y + margin.Top, imageSize.Width/2, imageSize.Height/2);
+            e.Graphics.DrawImage(this._categoryimage, e.Bounds.Width - imageSize.Width - margin.Right - _whatnextimage.Width - imageSize.Width - 30, e.Bounds.Y + margin.Top, imageSize.Width / 2, imageSize.Height / 2);
 
             //Draw Type Image
             if (_whatnextimage != null)
@@ -154,7 +194,8 @@ namespace CasparCGPlayout.ItemClasses
         {
             var rects = new List<Rectangle> { _clipIdBounds, _display1Bounds, _display2Bounds, _clipIdBounds };
             return rects;
-
         }
+
+        
     }
 }

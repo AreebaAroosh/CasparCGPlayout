@@ -62,10 +62,8 @@ namespace CasparCGPlayout
         public Form1()
         {
             //Setup Logger*
-            DOMConfigurator.Configure();
+            XmlConfigurator.Configure();
 
-           
-            
             InitializeComponent();
 
             //Wrap this to catch configuration errors
@@ -130,15 +128,15 @@ namespace CasparCGPlayout
             connectDatabase();
             setupCasparCGDevice();
 
-
             while (WaitingForChannelList) { 
                 Logger.Debug("Waiting for Channel List....");
             }
 
             ConnectOSCListener();
             populateWallDB();
-            //CheckUserPriveledges();
+            CheckUserPriveledges();
             //SetupNTP();
+            tmrCheckAssetOnDisk.Enabled = true;
             
         }
 
@@ -276,6 +274,7 @@ namespace CasparCGPlayout
             else if (oscMessage.Address == "/channel/1/mixer/audio/pFS")
             {
                 double dbfs = double.Parse(oscMessage.Data[0].ToString());
+                //label2.Text = dbfs.ToString();
                 //Invoke(new MethodInvoker(delegate { progressBar1.Value = (int)Math.Round(dbfs * 10000); }));
             }
             else if (oscMessage.Address == "/channel/1/stage/layer/1/speed")
@@ -283,8 +282,6 @@ namespace CasparCGPlayout
                 casparSpeed = oscMessage.Data[0].ToString();
             }
         }
-
-        
 
         private void updateDisplay(OscMessage oscMessage)
         {
@@ -310,17 +307,32 @@ namespace CasparCGPlayout
             {
                 Invoke(new MethodInvoker(delegate
                                              {
-                                                 lblCountDown.Text = _timeLeft;
-                                                 lblCountUp.Text = _timePast;
-                                                 lblLength.Text = _timeLength;
-                                                 pgbcountdown.Maximum = _frameLength;
-                                                 pgbcountdown.Value = _frameLeft;
+                                                 try
+                                                 {
+                                                     UpdateTimeDisplay();
+                                                 }
+                                                 catch (ArgumentOutOfRangeException ex2)
+                                                 {
+                                                     Logger.Info(ex2.Message);
+                                                 }
                                              }));
             }
             catch (InvalidOperationException ex)
             {
                 Logger.Info(ex.Message);
             }
+            
+        }
+
+        private void UpdateTimeDisplay()
+        {
+            lblCountDown.Text = _timeLeft;
+            lblCountUp.Text = _timePast;
+            lblLength.Text = _timeLength;
+            pgbCountdown.Maximum = _frameLength;
+            pgbCountdown.Value = _frameLeft;
+            pgbCountup.Maximum = _frameLength;
+            pgbCountup.Maximum = _framePast;
         }
 
         private void CheckPlayingStatus(OscMessage oscMessage)
@@ -342,7 +354,7 @@ namespace CasparCGPlayout
 
             Logger.Debug("Position: " + _cpi.position + " - Looking for " + i.ToString(CultureInfo.InvariantCulture));
             Logger.Debug("tmrLastSeconds: " + tmrLastSeconds.Enabled);
-            //If current position is 5 seconds behind the outframes (p) then tmrLastSeconds = true;
+            
             if ((_cpi.position >= i) && (_cpi.position <= _cpi.length))
             {
                 Logger.Debug("Found @: " + _cpi.position);
@@ -360,28 +372,25 @@ namespace CasparCGPlayout
                 }
             }
 
-            /*//CATCH EOF - This is buggy as hell, FFMPEG producer doesn't report frame length properly
-            if (cpi.Position >= cpi.Length-5)
-            {
-                StopLastSecondsandResetColor();
-            }
-            */
 
-            //If current position is at or greater than outframes (p) then go next
-            if (tmrLastSeconds.Enabled)
+            Console.WriteLine(_cpi.position);
+            Console.WriteLine(_cpi.length);
+            //CATCH EOF - This is buggy as hell, FFMPEG producer doesn't report frame length properly
+            if (_cpi.position >= (_cpi.outFrames-3))
             {
-                if (_cpi.position >= p-2)
+                if (tmrLastSeconds.Enabled)
                 {
-                    Logger.Info("******* GO NEXT *******");
-                    _cpi.index++;
-                    GoNext();
+                        Logger.Info("******* GO NEXT *******");
+                        stopLastSecondsandResetColor();
+                        _cpi.index++;
+                        GoNext();
                 }
-            }
+            }         
+            
         }
 
         private void GoNext()
         {
-
             ListBoxVideoItem item = (ListBoxVideoItem)ListRunningOrder.Items[_cpi.lastPlayedIndex];
 
             if (!boolHold)
@@ -448,7 +457,7 @@ namespace CasparCGPlayout
             /*
             var item = (ListBoxCGItem) ListRunningOrder.Items[_cpi.index];
             
-            var cg = new CasparCGItem("BoltonNS", NowNextCgLayer, false);
+           ~ var cg = new CasparCGItem("BoltonNS", NowNextCgLayer, false);
 
             var cgxml = new List<CGDataPair>{new CGDataPair("f0", "Olly Murs"), new CGDataPair("f1", "Dance with me tonight")};
             cg.Data.AddRange(cgxml);
@@ -459,11 +468,11 @@ namespace CasparCGPlayout
 
 
             var cItem2 = new CasparItem(AnnouncerLayer, "test", new Transition(TransitionType.MIX, 50));
-            _casparDevice.Channels[_channelId].Load(cItem2);
-            _casparDevice.Channels[_channelId].Play(cItem2.VideoLayer);
+            _casparDevice.Channels[casparServerChannelID].Load(cItem2);
+            _casparDevice.Channels[casparServerChannelID].Play(cItem2.VideoLayer);
 
-            _casparDevice.Channels[_channelId].CG.Add(cg, false);
-            _casparDevice.Channels[_channelId].CG.Play(NowNextCgLayer);
+            _casparDevice.Channels[casparServerChannelID].CG.Add(cg, false);
+            _casparDevice.Channels[casparServerChannelID].CG.Play(NowNextCgLayer);
 
             _cpi.framerate = 25;
             _cpi.position = 0;
@@ -477,14 +486,14 @@ namespace CasparCGPlayout
 
             item.isPlaying = true;
             tmrClockStarts.Enabled = false;
-             */
+            */
         }
          
 
         private void buildPlayVideo(int currentPlayingItemIndex)
         {
            ListBoxVideoItem item = (ListBoxVideoItem) ListRunningOrder.Items[_cpi.index];
-           CasparItem cItem = new CasparItem(VideoLayer, item.clipID, new Transition(TransitionType.MIX, videoMixTime), item.inFrames);
+           CasparItem cItem = new CasparItem(VideoLayer, item.clipID, new Transition(item.Segue, item.SegLength), item.inFrames);
 
             Logger.Info("Built CasparItem: " + cItem);
 
@@ -503,7 +512,7 @@ namespace CasparCGPlayout
 
         private void tmrNtpUpdateTick(object sender, EventArgs e)
         {
-            DoTimeSync();
+            //DoTimeSync();
         }
 
         private void ListBox1DoubleClick(object sender, EventArgs e)
@@ -531,16 +540,30 @@ namespace CasparCGPlayout
         {
             if (btnHold.BackColor == Color.Silver)
             {
-                btnHold.Text = "HOLDING ITEM";
-                btnHold.BackColor = Color.Red;
-                boolHold = true;
+                HoldOn();
+
             }
             else
             {
-                btnHold.Text = "Hold";
-                btnHold.BackColor = Color.Silver;
-                boolHold = false;
+                HoldOff();
             }
+        }
+
+        private void HoldOn()
+        {
+            btnHold.Text = "HOLDING ITEM";
+            btnHold.BackColor = Color.Red;
+            boolHold = true;
+            holdlatchingguitimer.Enabled = true;
+        }
+
+        private void HoldOff()
+        {
+            holdlatchingguitimer.Enabled = false;
+            btnHold.Text = "Hold";
+            btnHold.BackColor = Color.Silver;
+            boolHold = false;
+            btnHold.ForeColor = Color.Black;
         }
 
         private void TsLabelStopallClick(object sender, EventArgs e)
@@ -636,7 +659,7 @@ namespace CasparCGPlayout
             {
                 _connection.Open();
             }
-            catch (MySqlException e)
+            catch (MySqlException)
             {
                 if (Resources.Form1_connectDatabase_FATAL__Can_t_connect_to_MySQL_Server__Exiting != null && MessageBox.Show(text: Resources.Form1_connectDatabase_FATAL__Can_t_connect_to_MySQL_Server__Exiting, caption: Resources.Form1_connectDatabase_CasparCG_Playout, buttons: MessageBoxButtons.OK) == DialogResult.OK)
                 {
@@ -648,7 +671,31 @@ namespace CasparCGPlayout
        
         private void populateWallDB()
         {
-            const string command = "SELECT * FROM items_media, media, playlist WHERE media.item_id = items_media.id AND playlist.item_id = media.id";
+            /*
+            const string command = "SELECT media.id, " + 
+                                    "media.type, " +
+                                    "media.display1, " +
+                                    "media.display2, " +
+                                    "media.inframes, " + 
+                                    "media.outframes, " + 
+                                    "media.timespan, " +
+                                    "media.catergory, " +
+                                    "IF(media.type='Video', items_video.id, NULL) AS video_id, " +
+                                    "IF(media.type='Video', items_video.casparcg_filename, NULL) AS video_filename, " +
+                                    "IF(media.type='Video', items_video.thumbnail, NULL) AS video_thumbnail, " +
+                                    "IF(media.type='CG', items_cg.id, NULL) AS cg_id, " +
+                                    "IF(media.type='CG', items_cg.filename, NULL) AS cg_filename, " +
+                                    "IF(media.type='CG', items_cg.casparcg_filename, NULL) AS caspcg_filename " +
+                                    "FROM media, playlist " +
+                                    "LEFT OUTER JOIN items_video ON items_video.id = media.item_id " +
+                                    "LEFT OUTER JOIN items_cg ON items_cg.id = media.item_id " +
+                                    "WHERE type in ('Video','CG') AND media.item_id = playlist.item_id;";
+            */
+
+            const string command = "SELECT * FROM media, playlist, items_video WHERE media.id = playlist.item_id AND media.item_id = items_video.id";
+
+            Console.WriteLine(command);
+            
             new MySqlDataAdapter(command, _connection);
             using (var cmd = new MySqlCommand(command, _connection))
             {
@@ -662,25 +709,27 @@ namespace CasparCGPlayout
                         switch ((TypeEnum)Enum.Parse(typeof (TypeEnum), rdr.GetString("type")))
                         {
                             case TypeEnum.Video:
-                                var videoitem = new ListBoxVideoItem(1, "00:00:00", rdr.GetString("caspar_filename"),
+                                var videoitem = new ListBoxVideoItem(1, "00:00:00", rdr.GetString("casparcg_filename"),
                                                                      rdr.GetString("display1"), rdr.GetString("display2"),
                                                                      rdr.GetTimeSpan("timespan"),
                                                                      (TypeEnum) Enum.Parse(typeof (TypeEnum), rdr.GetString("type")),
-                                                                     (WhatNextEnum) Enum.Parse(typeof (WhatNextEnum), rdr.GetString("whatnext")),
+                                                                     (WhatNextEnum) Enum.Parse(typeof (WhatNextEnum), "Playnext"),
                                                                      rdr.GetInt32("inframes"), rdr.GetInt32("outframes"), BytestoImage((byte[])rdr["thumbnail"]),
-                                                                     (CatergoryEnum) Enum.Parse(typeof (CatergoryEnum), rdr.GetString("catergory")));
+                                                                     (VideoCatergoryEnum)Enum.Parse(typeof(VideoCatergoryEnum), rdr.GetString("catergory")),
+                                                                     (TransitionType)Enum.Parse(typeof(TransitionType), rdr.GetString("segue")),
+                                                                     rdr.GetInt32("length"),
+                                                                     rdr.GetString("filename"));
                                ListRunningOrder.Items.Add(videoitem);
                                 break;
                             case TypeEnum.CG:
-                                var cgitem = new ListBoxCGItem(1, "00:00:00", rdr.GetString("caspar_filename"),
+                                var cgitem = new ListBoxCGItem(1, "00:00:00", rdr.GetString("caspcg_filename"),
                                                                rdr.GetString("display1"), rdr.GetString("display2"),
                                                                rdr.GetTimeSpan("timespan"),
                                                                (TypeEnum)
                                                                Enum.Parse(typeof (TypeEnum), rdr.GetString("type")),
                                                                (WhatNextEnum)
-                                                               Enum.Parse(typeof (WhatNextEnum), rdr.GetString("whatnext")),
-                                                               rdr.GetInt32("inframes"), rdr.GetInt32("outframes"), BytestoImage((byte[])rdr["thumbnail"]),
-                                                               (CatergoryEnum) Enum.Parse(typeof (CatergoryEnum), rdr.GetString("catergory")));
+                                                               Enum.Parse(typeof (WhatNextEnum), "Playnext"),
+                                                               rdr.GetInt32("inframes"), rdr.GetInt32("outframes"));
                                ListRunningOrder.Items.Add(cgitem);
                                break;
                         }
@@ -802,7 +851,6 @@ namespace CasparCGPlayout
                                              toolstriplabelAMCPConnected.BackColor = Color.Red;
                                              toolstriplabelAMCPConnected.Text = Resources.Form1_casparDevice_AMCPFailed_Connect_AMCP_Disconnected;
                                          }));
-            //MessageBox.Show("Caspar Device has gone away");
             changeControlStatus(false);
 
             DialogResult result =
@@ -901,40 +949,12 @@ namespace CasparCGPlayout
 
         private void btnGoNextClick(object sender, EventArgs e)
         {
+            HoldOff();
             _cpi.index = ListRunningOrder.SelectedIndex;
             GoNext();
         }
 
-        private void btnDogToggleClick(object sender, EventArgs e)
-        {
-           
-            if (!channelDogVisible)
-            {
-                btnDogToggle.Text = Resources.Form1_btnDogToggle_Click_Channel_Dog_Enabled;
-                btnDogToggle.BackColor = _playingGreen;
-                channelDogVisible = true;
-
-                CasparCGItem cg = new CasparCGItem("channelbrand",500,false);
-                CasparCGDataCollection cgData = new CasparCGDataCollection();
-
-                // build data
-                //cgData.SetData("f0", "Name of Caller");
-                //cgData.SetData("f1", "Where they from?");
-
-
-                _casparDevice.Channels[casparServerChannelID].CG.Add(cg);
-                _casparDevice.Channels[casparServerChannelID].CG.Update(cg.Layer, cgData);
-                _casparDevice.Channels[casparServerChannelID].CG.Play(cg.Layer);
-            }
-            else
-            {
-                if (Resources.Form1_btnDogToggle_Click_Channel_Dog_Disabled != null)
-                    btnDogToggle.Text = Resources.Form1_btnDogToggle_Click_Channel_Dog_Disabled;
-                btnDogToggle.BackColor = _stoppedGrey;
-                channelDogVisible = false;
-                _casparDevice.Channels[casparServerChannelID].CG.Stop(500);
-            }
-        }
+       
 
         #endregion
 
@@ -968,6 +988,54 @@ namespace CasparCGPlayout
 
         private void digitalStudioClock1_Load(object sender, EventArgs e)
         {
+        }
+
+        private void holdlatchingguitimer_Tick(object sender, EventArgs e)
+        {
+            if (btnHold.ForeColor == Color.Red)
+            {
+
+                btnHold.ForeColor = Color.Black;
+                
+            }
+            else
+            {
+                btnHold.ForeColor = Color.Red;
+            }
+        }
+
+        private void cmsHold_Opening(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            var cg = new CasparCGItem("time", NowNextCgLayer, false);
+
+            var cgxml = new List<CGDataPair>{new CGDataPair("f0", "Olly Murs"), new CGDataPair("f1", "Dance with me tonight")};
+            cg.Data.AddRange(cgxml);
+
+            _casparDevice.Channels[casparServerChannelID].CG.Add(cg, false);
+            _casparDevice.Channels[casparServerChannelID].CG.Play(NowNextCgLayer);
+        }
+
+        private void tmrCheckAssetOnDisk_Tick(object sender, EventArgs e)
+        {
+            for (int i = 0; i < ListRunningOrder.Items.Count; i++)
+            {
+                if (ListRunningOrder.Items[i] is ListBoxVideoItem)
+                {
+                    ListBoxVideoItem itemtocheck = (ListBoxVideoItem)ListRunningOrder.Items[i];
+                    bool exist = File.Exists(itemtocheck.ClipFilename);
+                    if (itemtocheck.existOnDisk != exist) 
+                    {
+                        itemtocheck.existOnDisk = exist;
+                        ListRunningOrder.Items[i] = itemtocheck;
+                        ListRunningOrder.Invalidate();
+                    } 
+                }
+            }
         }
 
 

@@ -6,7 +6,7 @@ using System.Windows.Forms;
 
 namespace CasparCGPlayout.ItemClasses
 {
-    public enum CatergoryEnum
+    public enum VideoCatergoryEnum
     {
         Programme,
         Commercial,
@@ -24,14 +24,13 @@ namespace CasparCGPlayout.ItemClasses
             public int id { get; set; }
             public string timeStart { get; set; }
             public bool isPlaying { get; set; }
-        
+            
+
             public ListBoxItem(int id, string timestart)
             {
                 isPlaying = false;
                 this.id = id;
-                this.timeStart = timestart;
-                
-               }
+            }
 
             
         }

@@ -1,6 +1,6 @@
-﻿namespace CasparCGPlayout.Components
+﻿namespace FFmpegSharp.Examples
 {
-    partial class DigitalStudioClock
+    partial class VideoPlayerControl
     {
         /// <summary>
         /// Required designer variable.
@@ -28,16 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.SuspendLayout();
-            // 
-            // DigitalStudioClock
-            // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.Name = "DigitalStudioClock";
-            this.Size = new System.Drawing.Size(649, 507);
-            this.ResumeLayout(false);
-
+            components = new System.ComponentModel.Container();
         }
 
         #endregion
